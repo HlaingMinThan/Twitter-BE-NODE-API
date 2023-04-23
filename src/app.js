@@ -8,13 +8,22 @@ app.get('/', async (req, res) => {
     res.send('twitter BE API')
 });
 
-app.get('/tweets', async (req, res) => {
-    let tweets =await prisma.tweet.findMany({
-        orderBy : {
-            createdAt : 'desc'
-        }
-    })
-    res.json(tweets);
+app.get('/tweets', async (req, res , next) => {
+    try {
+        let tweets =await prisma.tweet.findMany({
+            orderBy :{
+                createdAt:"desc"
+            }
+        })
+        res.json(tweets);
+    }catch(e){
+        next(e)
+    }
+})
+
+app.use((err, req, res, next) => {
+    console.error(err.stack)
+    res.status(500).send('Something broke!')
 })
 
 app.listen(port, () => {
