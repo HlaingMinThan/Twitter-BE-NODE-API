@@ -1,6 +1,4 @@
-const { PrismaClient } = require('@prisma/client')
-
-const prisma = new PrismaClient()
+import prisma from '../prisma/index.js'
 
 async function main() {
   //express setup
