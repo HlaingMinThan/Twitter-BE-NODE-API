@@ -13,6 +13,14 @@ app.get('/tweets', async (req, res , next) => {
         let tweets =await prisma.tweet.findMany({
             orderBy :{
                 createdAt:"desc"
+            },
+            include : {
+                author:{
+                    select: {
+                        username : true,
+                        profile : true
+                    },
+                }
             }
         })
         res.json(tweets);
