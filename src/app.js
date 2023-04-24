@@ -14,16 +14,11 @@ app.get('/tweets', async (req, res , next) => {
         const totalTweets = await prisma.tweet.count();
         const totalPages = Math.ceil(totalTweets / 10); // assuming 10 posts per page
         let currentPage = req.query ? +req.query.page :  1;
-        if(currentPage > totalPages ){
-            return res.json({
-                message : 'no more data',
-                currentPage
-            });
-        }
+
         let itemsPerPage = 5;
         let tweets =await prisma.tweet.findMany({
             orderBy :{
-                createdAt:"desc"
+                id:"desc"
             },
             include : {
                 author:{
