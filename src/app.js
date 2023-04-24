@@ -12,10 +12,10 @@ app.get('/', async (req, res) => {
 app.get('/tweets', async (req, res , next) => {
     try {
         const totalTweets = await prisma.tweet.count();
-        const totalPages = Math.ceil(totalTweets / 10); // assuming 10 posts per page
+        let itemsPerPage = 10;
+        const totalPages = Math.ceil(totalTweets / itemsPerPage);
         let currentPage = req.query ? +req.query.page :  1;
 
-        let itemsPerPage = 5;
         let tweets =await prisma.tweet.findMany({
             orderBy :{
                 id:"desc"
