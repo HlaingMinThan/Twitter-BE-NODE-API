@@ -1,5 +1,6 @@
 import prisma from '../prisma/index.js'
 import express from 'express';
+import getSkipValueFromPage from './helpers/getSkipValueFromPage.js';
 
 const app = express()
 const port = 3000;
@@ -10,6 +11,16 @@ app.get('/', async (req, res) => {
 
 app.get('/tweets', async (req, res , next) => {
     try {
+        const totalTweets = await prisma.tweet.count();
+        const totalPages = Math.ceil(totalTweets / 10); // assuming 10 posts per page
+        let currentPage = req.query ? +req.query.page :  1;
+        if(currentPage > totalPages ){
+            return res.json({
+                message : 'no more data',
+                currentPage
+            });
+        }
+        let itemsPerPage = 5;
         let tweets =await prisma.tweet.findMany({
             orderBy :{
                 createdAt:"desc"
@@ -21,13 +32,21 @@ app.get('/tweets', async (req, res , next) => {
                         profile : true
                     },
                 }
-            }
+            },
+            take : itemsPerPage,
+            skip : getSkipValueFromPage(currentPage,itemsPerPage)
         })
-        res.json(tweets);
+        res.json({
+            data : tweets,
+            totalPages,
+            currentPage
+        });
     }catch(e){
         next(e)
     }
 })
+
+
 
 app.use((err, req, res, next) => {
     console.error(err.stack)
