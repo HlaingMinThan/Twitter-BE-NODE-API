@@ -41,6 +41,28 @@ app.get('/tweets', async (req, res , next) => {
     }
 })
 
+app.get('/tweets/:id', async (req,res,next) => {
+    try {
+        let tweet = await prisma.tweet.findUnique({
+            where : {
+                id : +req.params.id
+            },
+            include : {
+                author : {
+                    select : {
+                        profile : true,
+                        username : true
+                    }
+                }
+            }
+        })
+setTimeout(() => {
+    res.json(tweet)
+}, 2000);
+    }catch(e) {
+        next(e)
+    }
+})
 
 
 app.use((err, req, res, next) => {
