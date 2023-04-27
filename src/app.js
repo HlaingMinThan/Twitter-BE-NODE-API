@@ -11,6 +11,20 @@ app.get('/', async (req, res) => {
     res.send('twitter BE API')
 });
 
+app.get('/users/:id', async (req,res,next) => {
+    try {
+        let user = await prisma.user.findUnique({
+            where : {
+                id : +req.params.id
+            },
+        });
+
+        return res.json(user);
+    }catch(e){
+        next(e)
+    }
+})
+
 app.get('/tweets', async (req, res , next) => {
     try {
         const totalTweets = await prisma.tweet.count();
@@ -25,6 +39,7 @@ app.get('/tweets', async (req, res , next) => {
             include : {
                 author:{
                     select: {
+                        id : true,
                         name : true,
                         username : true,
                         profile : true
@@ -69,6 +84,7 @@ app.get('/tweets/:id', async (req,res,next) => {
             include : {
                 author : {
                     select : {
+                        id : true,
                         name : true,
                         profile : true,
                         username : true
