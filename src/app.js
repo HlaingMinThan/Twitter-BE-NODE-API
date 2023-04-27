@@ -2,7 +2,9 @@ import prisma from '../prisma/index.js'
 import express from 'express';
 import getSkipValueFromPage from './helpers/getSkipValueFromPage.js';
 
-const app = express()
+const app = express();
+
+app.use(express.json())
 const port = 3000;
 // respond with "hello world" when a GET request is made to the homepage
 app.get('/', async (req, res) => {
@@ -23,6 +25,7 @@ app.get('/tweets', async (req, res , next) => {
             include : {
                 author:{
                     select: {
+                        name : true,
                         username : true,
                         profile : true
                     },
@@ -40,6 +43,22 @@ app.get('/tweets', async (req, res , next) => {
         next(e)
     }
 })
+app.post('/tweets',async (req,res,next) => {
+    try {
+        let { description } = req.body;
+
+        let tweet = await prisma.tweet.create({
+            data : {
+                description,
+                authorId : 1
+            }
+        });
+
+        return res.json(tweet);
+    }catch(e) {
+        next(e)
+    }
+})
 
 app.get('/tweets/:id', async (req,res,next) => {
     try {
@@ -50,15 +69,14 @@ app.get('/tweets/:id', async (req,res,next) => {
             include : {
                 author : {
                     select : {
+                        name : true,
                         profile : true,
                         username : true
                     }
                 }
             }
         })
-setTimeout(() => {
-    res.json(tweet)
-}, 2000);
+        res.json(tweet)
     }catch(e) {
         next(e)
     }
