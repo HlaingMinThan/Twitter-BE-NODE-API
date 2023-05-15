@@ -1,6 +1,12 @@
 import prisma from '../prisma/index.js'
 import express from 'express';
 import getSkipValueFromPage from './helpers/getSkipValueFromPage.js';
+import {check} from 'express-validator';
+import * as dotenv from 'dotenv'
+import { createUser, signIn } from './handlers/user.js';
+import handleError from './handlers/handleError.js';
+
+dotenv.config()
 
 const app = express();
 
@@ -133,6 +139,16 @@ app.get('/tweets/:id', async (req,res,next) => {
         next(e)
     }
 })
+
+app.post('/login',  [
+    check('email').notEmpty().withMessage('Email is required'),
+    check('password').notEmpty().withMessage('Password is required').isLength({ min: 5 }).withMessage('must be at least 5 chars long')
+], handleError,signIn)
+app.post('/register',[
+    check('username').notEmpty().withMessage('Username is required')
+    ,check('email').notEmpty().withMessage('Email is required'),
+    check('password').notEmpty().withMessage('Password is required')
+],handleError, createUser)
 
 
 app.use((err, req, res, next) => {
