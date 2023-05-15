@@ -24,6 +24,42 @@ app.get('/users/:id', async (req,res,next) => {
         next(e)
     }
 })
+app.get('/users/:id/tweets', async (req,res,next) => {
+    try {
+        const totalTweets = await prisma.tweet.count();
+        let itemsPerPage = 10;
+        const totalPages = Math.ceil(totalTweets / itemsPerPage);
+        let currentPage = req.query ? +req.query.page :  1;
+        let tweets = await prisma.tweet.findMany({
+            where : {
+                authorId : +req.params.id
+            },
+            orderBy : {
+                createdAt : 'desc'
+            },
+            include : {
+                author:{
+                    select: {
+                        id : true,
+                        name : true,
+                        username : true,
+                        profile : true
+                    },
+                }
+            },
+            take : itemsPerPage,
+            skip : getSkipValueFromPage(currentPage,itemsPerPage)
+        });
+
+        return res.json({
+            data : tweets,
+            totalPages,
+            currentPage
+        });
+    }catch(e){
+        next(e)
+    }
+})
 
 app.get('/tweets', async (req, res , next) => {
     try {
